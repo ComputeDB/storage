@@ -13,10 +13,21 @@ Store objects (bytes) ; supported backends
 
 ```javascript
 var Storage = require('compute-storage')
+console.log(Storage.backends) // => ['s3']
+```
 
-var store = new Storage(/* pass config here */)
+Configure storage system. Top level key has to be one of `backends`.
 
-storage.uploadResult(task, filePath, function (err, update) {
+```javascript
+var s3_store = new Storage({s3: /* pass AWS S3 config here */})
+var b2_store = new Storage({b2: /* pass Backblaze B2 config here */})
+var fs_store = new Storage({fs: /* pass local filesystem config here */})
+```
+
+Upload a file, same API for any backend
+
+```javascript
+storage.upload(task, filePath, function (err, update) {
   if (err) {
     // `handle` errors
     console.error('Error occurred uploading ' + filePath, err)
@@ -33,7 +44,7 @@ storage.uploadResult(task, filePath, function (err, update) {
 })
 ```
 
-## Usage
+## S3 Example
 
 Using local Amazon S3 compatible server. https://github.com/jubos/fake-s3
 
@@ -43,7 +54,7 @@ gem install fakes3 # install it
 fakes3 -r /tmp/data -p 4567
 ```
 
-Create a config file
+Create a config file and pass to constructor
 
 ```javascript
 var fake_s3 = {
@@ -51,4 +62,7 @@ var fake_s3 = {
   secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
   endpoint: 'http://localhost:4567'
 }
+
+// config key selects backend (`s3`)
+var storage = new Storage({s3: fake_s3})
 ```

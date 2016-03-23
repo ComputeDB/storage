@@ -6,7 +6,19 @@ fs.writeFileSync(filePath, 'hello')
 
 var task = {name: 'TodaysProfit'}
 
-Storage.upload_file(task, filePath, function (err, status) {
+// https://github.com/jubos/fake-s3
+// install:   gem install fakes3
+// start:     fakes3 -r /tmp/data -p 4567
+
+var fake_s3 = {
+  accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+  secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+  endpoint: 'http://localhost:4567'
+}
+
+var storage = new Storage({s3: fake_s3})
+
+storage.upload(task, filePath, function (err, status) {
   if (err) {
     console.error(err.stack || err)
     process.exit(-1)

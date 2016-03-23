@@ -1,5 +1,7 @@
 var backends = {
-  s3: './s3backend.js'
+  s3: './backends/s3.js',
+  b2: './backends/b2.js',
+  fs: './backends/fs.js'
 }
 
 function pick_backend (config) {
@@ -11,6 +13,7 @@ function pick_backend (config) {
   }
 }
 
+// create and initialize backend
 function Storage (config) {
   this.backend = pick_backend(config)
   if (!this.backend) {
@@ -18,8 +21,14 @@ function Storage (config) {
   }
 }
 
-Storage.upload_file = function (task, filePath, callback) {
-  this.backend.upload_file(task, filePath, callback)
+// list available backends
+Storage.backends = function () {
+  return Object.keys(backends)
+}
+
+// upload a file using selected backend
+Storage.prototype.upload = function (task, filePath, callback) {
+  this.backend.upload(task, filePath, callback)
 }
 
 module.exports = Storage
