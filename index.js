@@ -1,39 +1,25 @@
-var S3Backend = require('./s3backend.js')
-
-var task = {
-  name: 'TodaysProfit'
+var backends = {
+  s3: './s3backend.js'
 }
 
-var fs = require('fs')
-
-var filePath = '/tmp/hello.txt'
-
-fs.writeFileSync(filePath, 'hello')
-
-var conf = {
-  storage: {
-    s3: {
-      accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-      secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-      endpoint: 'http://localhost:4567'
+function pick_backend (config) {
+  for (var key of Object.keys(backends)) {
+    if (config[key]) {
+      var Backend = require(backends[key])
+      return new Backend(config[key])
     }
   }
 }
 
-var s3 = new S3Backend(conf)
-
-s3.uploadResult(task, filePath, function (err, status) {
-  if (err) {
-    console.error(err.stack || err)
-    process.exit(-1)
+function Storage (config) {
+  this.backend = pick_backend(config)
+  if (!this.backend) {
+    throw Error('failed to initialize backend')
   }
+}
 
-  if (status.progress) {
-    console.log(JSON.stringify(status.progress, null, 2))
-  }
+Storage.upload_file = function (task, filePath, callback) {
+  this.backend.upload_file(task, filePath, callback)
+}
 
-  if (status.done) {
-    console.log('done', status.done)
-    process.exit(0)
-  }
-})
+module.exports = Storage
